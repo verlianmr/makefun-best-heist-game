@@ -5,7 +5,7 @@
 // Runs twice in the grader and must write the same bytes both times:
 // the dossier is built from file contents alone, so it does.
 
-import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -13,7 +13,9 @@ import { buildDossier } from './vendor/makefun-game.ts';
 const root = dirname(fileURLToPath(import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-rmSync(out, { recursive: true, force: true });
+// Never remove `out` itself: in the grader it is a Docker bind-mount and
+// rmdir on the mount point fails EBUSY. Just ensure it exists.
+mkdirSync(out, { recursive: true });
 mkdirSync(join(out, 'game'), { recursive: true });
 mkdirSync(join(out, 'screenshots'), { recursive: true });
 cpSync(join(root, 'game'), join(out, 'game'), { recursive: true });
